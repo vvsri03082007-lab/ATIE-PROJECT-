@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATIE | Adaptive Threat Intelligence Engine & SOC Operations Center</title>
+  <meta name="description" content="Adaptive Cybersecurity Threat Intelligence Engine (ATIE): Real-Time Multi-Format SIEM Simulator with Trie, Boyer-Moore, and Z-Score Anomaly Detection.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+</head>
+<body>
+
+  <!-- Header HUD -->
+  <header class="header-hud">
+    <div class="hud-container">
+      
+      <!-- Brand & Status -->
+      <div class="brand-section">
+        <div class="brand-logo-badge">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
+        <div class="brand-titles">
+          <h1>ATIE SOC OPERATIONS <span class="engine-version">v1.0-HYBRID</span></h1>
+          <p>Adaptive Threat Intelligence Engine • SIEM Real-Time Ingestion Console</p>
+        </div>
+        <div id="statusPill" class="status-pill">
+          <div class="status-dot"></div>
+          <span id="statusText">STANDBY</span>
+        </div>
+      </div>
+
+      <!-- Simulation & Controls Deck -->
+      <div class="hud-controls">
+        <div class="control-group">
+          <span class="control-label">Log Source</span>
+          <select id="logSourceSelect" class="select-input">
+            <option value="APACHE">Apache HTTP Telemetry</option>
+            <option value="SYSLOG">Linux Syslog (Auth & SSHD)</option>
+            <option value="WINDOWS">Windows Event Logs (CSV)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <span class="control-label">Delay</span>
+          <select id="delaySelect" class="select-input">
+            <option value="100">100ms (Turbo)</option>
+            <option value="200" selected>200ms (Default)</option>
+            <option value="500">500ms (Analysis)</option>
+            <option value="1000">1000ms (Step-by-Step)</option>
+          </select>
+        </div>
+
+        <button id="btnStartSim" class="btn btn-primary">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          Launch Stream
+        </button>
+
+        <button id="btnStopSim" class="btn btn-danger" disabled>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="6" y="6" width="12" height="12"/>
+          </svg>
+          Halt
+        </button>
+
+        <button id="btnClearAlerts" class="btn btn-secondary" title="Reset telemetry and alerts">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+          Clear
+        </button>
+
+        <button id="btnToggleSound" class="btn btn-secondary btn-icon" title="Toggle Audio Siren for Critical Threats">
+          <svg id="soundIconOn" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>
+          <svg id="soundIconOff" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none; color: var(--text-muted);">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <line x1="23" y1="9" x2="17" y2="15"/>
+            <line x1="17" y1="9" x2="23" y2="15"/>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Application Area -->
+  <main class="app-main">
+
+    <!-- KPI Metric Summary Cards -->
+    <section class="kpi-grid">
+      <!-- KPI 1 -->
+      <div class="kpi-card" style="--card-accent: var(--cyber-cyan);">
+        <div class="kpi-header">
+          <span class="kpi-title">Telemetry Ingested</span>
+          <div class="kpi-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 17l6-6-6-6M12 19h8"/>
+            </svg>
+          </div>
+        </div>
+        <div class="kpi-value-row">
+          <span id="kpiLogsIngested" class="kpi-value">0</span>
+          <span class="kpi-subtext">events processed</span>
+        </div>
+      </div>
+
+      <!-- KPI 2 -->
+      <div class="kpi-card" style="--card-accent: var(--cyber-critical);">
+        <div class="kpi-header">
+          <span class="kpi-title">Threat Alerts Triggered</span>
+          <div class="kpi-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+        </div>
+        <div class="kpi-value-row">
+          <span id="kpiAlertsTotal" class="kpi-value" style="color: var(--cyber-critical);">0</span>
+          <span id="kpiCriticalBadge" class="kpi-subtext">0 critical</span>
+        </div>
+      </div>
+
+      <!-- KPI 3 -->
+      <div class="kpi-card" style="--card-accent: var(--cyber-purple);">
+        <div class="kpi-header">
+          <span class="kpi-title">Max Threat Risk Index</span>
+          <div class="kpi-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+        </div>
+        <div class="kpi-value-row">
+          <span id="kpiMaxRisk" class="kpi-value">0.0</span>
+          <span class="kpi-subtext">/ 10.0 scale</span>
+        </div>
+      </div>
+
+      <!-- KPI 4 -->
+      <div class="kpi-card" style="--card-accent: var(--cyber-emerald);">
+        <div class="kpi-header">
+          <span class="kpi-title">Reputation Blacklist</span>
+          <div class="kpi-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+        </div>
+        <div class="kpi-value-row">
+          <span id="kpiBlacklistCount" class="kpi-value">12</span>
+          <span class="kpi-subtext">blocked IPs</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dual Monitoring Deck -->
+    <section class="ops-deck-grid">
+
+      <!-- Left Panel: Real-time Ingestion Stream -->
+      <div class="deck-panel">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <span class="panel-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyber-cyan)" stroke-width="2">
+                <polyline points="4 17 10 11 4 5"/>
+                <line x1="12" y1="19" x2="20" y2="19"/>
+              </svg>
+              Live Telemetry Stream
+            </span>
+            <span id="streamCountBadge" class="panel-badge">0 logs</span>
+          </div>
+          <div class="panel-actions">
+            <label style="font-size: 0.72rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+              <input type="checkbox" id="chkAutoScroll" checked style="accent-color: var(--cyber-cyan);">
+              Auto-Scroll
+            </label>
+            <button id="btnClearStream" class="btn btn-secondary btn-icon" title="Clear log window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6L6 18M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="terminalStream" class="terminal-stream-body">
+          <div class="terminal-line" style="color: var(--text-muted); justify-content: center; padding: 2rem 0;">
+            Waiting for log simulation to start. Click "Launch Stream" above to stream sample logs.
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Priority Threat Alert Matrix -->
+      <div class="deck-panel">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <span class="panel-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyber-critical)" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              </svg>
+              Priority Threat Alert Feed
+            </span>
+            <span id="alertCountBadge" class="panel-badge" style="background: rgba(255, 0, 85, 0.15); color: #fb7185;">0 alerts</span>
+          </div>
+          <div class="panel-actions">
+            <input type="text" id="alertSearchInput" class="text-input" placeholder="Search alerts..." style="min-width: 140px; padding: 0.25rem 0.6rem; font-size: 0.75rem;">
+          </div>
+        </div>
+
+        <div id="alertFeed" class="alert-feed-body">
+          <div class="terminal-line" style="color: var(--text-muted); justify-content: center; padding: 2rem 0;">
+            No active threat alerts triggered yet.
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Intelligence Tabs Hub -->
+    <section class="intel-hub-panel">
+      <!-- Tabs Navigation -->
+      <nav class="tabs-nav">
+        <button class="tab-btn active" data-tab="tab-analytics">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+          Threat Analytics
+        </button>
+        <button class="tab-btn" data-tab="tab-intel">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          IP Blacklist Intel
+        </button>
+        <button class="tab-btn" data-tab="tab-thresholds">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          Detection Sensitivity
+        </button>
+        <button class="tab-btn" data-tab="tab-analyzer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"/>
+            <polyline points="8 6 2 12 8 18"/>
+          </svg>
+          Custom Payload Analyzer
+        </button>
+        <button class="tab-btn" data-tab="tab-report">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10 9 9 9 8 9"/>
+          </svg>
+          Incident Report
+        </button>
+      </nav>
+
+      <!-- Tabs Content -->
+      <div class="tab-content">
+        
+        <!-- Tab 1: Threat Analytics -->
+        <div id="tab-analytics" class="tab-pane active">
+          <div class="analytics-grid">
+            <!-- Severity Bar Chart -->
+            <div class="chart-box">
+              <div class="chart-title">
+                <span>Severity Distribution</span>
+                <span style="font-size: 0.72rem; color: var(--text-muted);">PRIORITY QUEUE</span>
+              </div>
+              <div class="chart-bars">
+                <div class="bar-row">
+                  <div class="bar-labels">
+                    <span style="color: var(--cyber-critical);">CRITICAL (Risk &ge; 8.0)</span>
+                    <span id="statCritVal">0</span>
+                  </div>
+                  <div class="bar-track"><div id="barCrit" class="bar-fill" style="width: 0%; background: var(--cyber-critical);"></div></div>
+                </div>
+                <div class="bar-row">
+                  <div class="bar-labels">
+                    <span style="color: #fb7185;">HIGH (Risk 6.0 - 7.9)</span>
+                    <span id="statHighVal">0</span>
+                  </div>
+                  <div class="bar-track"><div id="barHigh" class="bar-fill" style="width: 0%; background: #fb7185;"></div></div>
+                </div>
+                <div class="bar-row">
+                  <div class="bar-labels">
+                    <span style="color: #fbbf24;">MEDIUM (Risk 4.0 - 5.9)</span>
+                    <span id="statMedVal">0</span>
+                  </div>
+                  <div class="bar-track"><div id="barMed" class="bar-fill" style="width: 0%; background: #fbbf24;"></div></div>
+                </div>
+                <div class="bar-row">
+                  <div class="bar-labels">
+                    <span style="color: #60a5fa;">LOW (Risk &lt; 4.0)</span>
+                    <span id="statLowVal">0</span>
+                  </div>
+                  <div class="bar-track"><div id="barLow" class="bar-fill" style="width: 0%; background: #60a5fa;"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Threat Category Chart -->
+            <div class="chart-box">
+              <div class="chart-title">
+                <span>Threat Classification Vectors</span>
+                <span style="font-size: 0.72rem; color: var(--text-muted);">ATTACK PATTERNS</span>
+              </div>
+              <div id="categoryBars" class="chart-bars">
+                <div style="font-size: 0.75rem; color: var(--text-muted);">No threat data accumulated yet.</div>
+              </div>
+            </div>
+
+            <!-- Algorithm Metrics -->
+            <div class="chart-box">
+              <div class="chart-title">
+                <span>Engine Optimization Telemetry</span>
+                <span style="font-size: 0.72rem; color: var(--text-muted);">ALGORITHMS</span>
+              </div>
+              <div class="chart-bars">
+                <div class="bar-row">
+                  <div class="bar-labels">
+                    <span style="color: var(--cyber-cyan);">Boyer-Moore String Search</span>
+                    <span style="color: var(--cyber-emerald); font-weight: 700;">Sub-linear O(n/m)</span>
+                  </div>
+                  <p style="font-size: 0.72rem; color: var(--text-muted);">Precomputed bad-character skip tables for high-speed SQLi/XSS identification.</p>
+                </div>
+                <div class="bar-row">
+                  <div class="bar-labels">
+                    <span style="color: var(--cyber-purple);">Prefix Trie Tree</span>
+                    <span style="color: var(--cyber-emerald); font-weight: 700;">O(L) Traversal</span>
+                  </div>
+                  <p style="font-size: 0.72rem; color: var(--text-muted);">Pre-indexed root character branching for detecting directory traversal attempts.</p>
+                </div>
+                <div class="bar-row">
+                  <div class="bar-labels">
+                    <span style="color: var(--cyber-amber);">Z-Score Statistical Anomaly</span>
+                    <span style="color: var(--cyber-cyan); font-weight: 700;">Dynamic Baseline</span>
+                  </div>
+                  <p style="font-size: 0.72rem; color: var(--text-muted);">Computes standard deviation (&sigma;) deviations against rolling time window history.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: IP Blacklist Intel -->
+        <div id="tab-intel" class="tab-pane">
+          <div class="blacklist-controls">
+            <input type="text" id="newIpInput" class="text-input" placeholder="Enter IP address to blacklist (e.g. 198.51.100.99)...">
+            <button id="btnAddBlacklist" class="btn btn-primary">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Block IP
+            </button>
+            <input type="text" id="searchBlacklistInput" class="text-input" placeholder="Search database..." style="max-width: 250px;">
+          </div>
+
+          <div class="ip-table-wrapper">
+            <table class="cyber-table">
+              <thead>
+                <tr>
+                  <th>IP Address</th>
+                  <th>Reputation Status</th>
+                  <th>Risk Weight</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="blacklistTableBody">
+                <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Loading blacklist database...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab 3: Detection Thresholds -->
+        <div id="tab-thresholds" class="tab-pane">
+          <div class="thresholds-grid">
+            
+            <div class="threshold-card">
+              <div class="threshold-header">
+                <h4>Sliding Window: Time Window</h4>
+                <p>Duration in seconds to correlate authentication attempts per IP/user.</p>
+              </div>
+              <div class="slider-group">
+                <div class="slider-info">
+                  <span>Window Size:</span>
+                  <span id="valWindowSec">60 seconds</span>
+                </div>
+                <input type="range" id="rangeWindowSec" class="range-slider" min="10" max="300" step="5" value="60">
+              </div>
+            </div>
+
+            <div class="threshold-card">
+              <div class="threshold-header">
+                <h4>Sliding Window: Failure Threshold</h4>
+                <p>Maximum failed logins tolerated before triggering BRUTE_FORCE alert.</p>
+              </div>
+              <div class="slider-group">
+                <div class="slider-info">
+                  <span>Threshold Limit:</span>
+                  <span id="valFailureThresh">5 failures</span>
+                </div>
+                <input type="range" id="rangeFailureThresh" class="range-slider" min="2" max="25" step="1" value="5">
+              </div>
+            </div>
+
+            <div class="threshold-card">
+              <div class="threshold-header">
+                <h4>Z-Score: Anomaly Sensitivity (&sigma;)</h4>
+                <p>Standard deviations above baseline required to trigger TRAFFIC_ANOMALY.</p>
+              </div>
+              <div class="slider-group">
+                <div class="slider-info">
+                  <span>Sensitivity (&sigma;):</span>
+                  <span id="valZScore">2.50 &sigma;</span>
+                </div>
+                <input type="range" id="rangeZScore" class="range-slider" min="1.5" max="4.0" step="0.1" value="2.5">
+              </div>
+            </div>
+
+          </div>
+          <div style="margin-top: 1.25rem; display: flex; justify-content: flex-end;">
+            <button id="btnSaveThresholds" class="btn btn-primary">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+              </svg>
+              Apply Sensitivity Settings
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab 4: Custom Log Payload Analyzer -->
+        <div id="tab-analyzer" class="tab-pane">
+          <div class="analyzer-box">
+            <div>
+              <h4 style="font-size: 0.95rem; margin-bottom: 0.35rem;">Test Custom Security Payloads</h4>
+              <p style="font-size: 0.78rem; color: var(--text-muted);">Inject single log entries or attack strings directly into the live engine to inspect pattern matching and risk computation.</p>
+            </div>
+
+            <div class="payload-buttons">
+              <button class="payload-pill" data-type="APACHE" data-log='192.168.1.45 - - [24/Jun/2026:18:00:35 +0530] "GET /search.php?q=UNION+SELECT+username,password+FROM+users HTTP/1.1" 200 892 "-" "-"'>SQL Injection (Apache)</button>
+              <button class="payload-pill" data-type="APACHE" data-log='192.168.1.50 - - [24/Jun/2026:18:00:45 +0530] "GET /profile.php?id=&lt;script&gt;alert(document.cookie)&lt;/script&gt; HTTP/1.1" 200 1102 "-" "-"'>XSS Attack (Apache)</button>
+              <button class="payload-pill" data-type="APACHE" data-log='192.168.1.75 - - [24/Jun/2026:18:01:10 +0530] "GET /file_viewer.php?path=../../../../etc/passwd HTTP/1.1" 500 0 "-" "-"'>Path Traversal (Trie)</button>
+              <button class="payload-pill" data-type="APACHE" data-log='85.25.43.10 - - [24/Jun/2026:18:01:40 +0530] "GET /shell.php?cmd=cmd.exe HTTP/1.1" 200 45 "-" "-"'>Command Injection (Apache)</button>
+              <button class="payload-pill" data-type="SYSLOG" data-log='Sep  8 14:37:12 debian-prod sshd[14220]: Failed password for invalid user admin from 185.220.101.5 port 42890 ssh2'>SSHD Brute Force (Syslog)</button>
+              <button class="payload-pill" data-type="WINDOWS" data-log='2026-09-08 14:38:15,Security,4625,Audit Failure,WIN-DC01,SYSTEM,Administrator,0x8009030c,198.51.100.42'>Windows Logon Failure (CSV)</button>
+            </div>
+
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+              <span class="control-label">Parser:</span>
+              <select id="analyzerParserSelect" class="select-input">
+                <option value="APACHE">Apache Format</option>
+                <option value="SYSLOG">Syslog Format</option>
+                <option value="WINDOWS">Windows Event Format</option>
+              </select>
+            </div>
+
+            <textarea id="analyzerInput" class="code-textarea" placeholder="Paste single raw log string here..."></textarea>
+
+            <div style="display: flex; justify-content: flex-end;">
+              <button id="btnRunAnalyzer" class="btn btn-primary">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                Scan Payload in Engine
+              </button>
+            </div>
+
+            <div id="analyzerResultBox" class="analyzer-result" style="display: none;">
+              <!-- Dynamic Result -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 5: Incident Report -->
+        <div id="tab-report" class="tab-pane">
+          <div class="report-view-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+              <div>
+                <h4 style="font-size: 0.95rem;">Executive Security Incident Investigation Report</h4>
+                <p style="font-size: 0.78rem; color: var(--text-muted);">Auto-compiled Markdown summary documenting all triggered alerts, timeline, and remediation actions.</p>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <button id="btnRefreshReport" class="btn btn-secondary">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 4 23 10 17 10"/>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                  </svg>
+                  Refresh
+                </button>
+                <button id="btnDownloadReport" class="btn btn-primary">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  Export Markdown (.md)
+                </button>
+              </div>
+            </div>
+
+            <pre id="reportMarkdownPre" class="markdown-preview">Loading incident report...</pre>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Incident Detail Modal -->
+  <div id="alertModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">Threat Alert Details</h3>
+        <button id="btnCloseModal" class="btn btn-secondary btn-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-detail-row">
+          <span class="detail-label">Severity & Compound Risk</span>
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <span id="modalSeverityPill" class="severity-pill">HIGH</span>
+            <span id="modalRiskScore" class="risk-badge">Risk: 7.5 / 10.0</span>
+          </div>
+        </div>
+        <div class="modal-detail-row">
+          <span class="detail-label">Threat Classification</span>
+          <span id="modalCategory" class="detail-value">SQL_INJECTION</span>
+        </div>
+        <div class="modal-detail-row">
+          <span class="detail-label">Source IP Address</span>
+          <span id="modalIp" class="detail-value" style="color: var(--cyber-cyan);">198.51.100.42</span>
+        </div>
+        <div class="modal-detail-row">
+          <span class="detail-label">Target Affected Node</span>
+          <span id="modalSystem" class="detail-value">Web-Server-01</span>
+        </div>
+        <div class="modal-detail-row">
+          <span class="detail-label">Incident Description</span>
+          <span id="modalDesc" class="detail-value">Malicious signature pattern matched</span>
+        </div>
+        <div class="modal-detail-row">
+          <span class="detail-label">Extracted Malicious Payload</span>
+          <span id="modalPayload" class="detail-value" style="color: #fb7185;">' OR '1'='1</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="modalBlockIpBtn" class="btn btn-danger" style="margin-right: auto;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+          </svg>
+          Block Source IP
+        </button>
+        <button id="modalCloseBtn" class="btn btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

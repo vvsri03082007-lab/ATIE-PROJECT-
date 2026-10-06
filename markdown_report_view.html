@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 5.3: Generated Markdown Security Investigation Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    background: #06090f;
+    background-image: 
+      radial-gradient(ellipse 70% 40% at 50% 0%, rgba(14, 165, 233, 0.12), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(99, 102, 241, 0.08), transparent);
+    color: #e6edf3;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 35px;
+  }
+
+  .ide-window {
+    width: 1540px;
+    max-width: 100%;
+    background: #0d1117;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 
+      0 0 0 1px rgba(0, 0, 0, 0.5),
+      0 25px 60px rgba(0, 0, 0, 0.8),
+      0 0 70px rgba(56, 189, 248, 0.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* IDE Window Top Title Bar */
+  .ide-title-bar {
+    background: #161b22;
+    padding: 9px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    user-select: none;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .window-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .ctrl-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .dot-close { background: #ff5f56; border: 1px solid #e0443e; }
+  .dot-min { background: #ffbd2e; border: 1px solid #dea123; }
+  .dot-max { background: #27c93f; border: 1px solid #1aab29; }
+
+  .ide-title-text {
+    font-size: 12px;
+    color: #8b949e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ide-title-text strong { color: #f0f6fc; }
+
+  .ide-title-actions {
+    display: flex;
+    gap: 12px;
+    color: #8b949e;
+    font-size: 11px;
+  }
+
+  /* Editor Tabs & Breadcrumb Bar */
+  .editor-tabs-bar {
+    background: #0d1117;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #21262d;
+    padding-left: 10px;
+    user-select: none;
+  }
+
+  .editor-tab {
+    padding: 8px 18px;
+    font-size: 12.5px;
+    color: #8b949e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-right: 1px solid #21262d;
+    font-family: 'Inter', sans-serif;
+  }
+  .editor-tab.active {
+    background: #0d1117;
+    color: #f0f6fc;
+    border-bottom: 2px solid #58a6ff;
+    font-weight: 500;
+  }
+  .tab-md-icon {
+    color: #58a6ff;
+    font-weight: 700;
+    font-size: 11px;
+    border: 1px solid #58a6ff;
+    border-radius: 3px;
+    padding: 0 3px;
+  }
+  .tab-badge {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+
+  .editor-breadcrumbs {
+    background: #0d1117;
+    padding: 6px 24px;
+    font-size: 11.5px;
+    color: #8b949e;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid #21262d;
+    font-family: 'Inter', sans-serif;
+  }
+  .bc-sep { color: #484f58; }
+  .bc-active { color: #f0f6fc; font-weight: 500; }
+
+  /* Markdown Document Body */
+  .markdown-body {
+    padding: 36px 48px;
+    font-size: 14.5px;
+    line-height: 1.65;
+    background: #0d1117;
+    color: #e6edf3;
+  }
+
+  /* Document Typography */
+  h1 {
+    font-size: 1.85rem;
+    font-weight: 700;
+    color: #f0f6fc;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #30363d;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  h1 .doc-icon {
+    font-size: 1.6rem;
+  }
+
+  h2 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: #58a6ff;
+    margin-top: 26px;
+    margin-bottom: 14px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #21262d;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #f0f6fc;
+    margin-top: 18px;
+    margin-bottom: 10px;
+  }
+
+  p, ul {
+    margin-bottom: 14px;
+  }
+
+  ul {
+    padding-left: 24px;
+  }
+
+  li {
+    margin-bottom: 6px;
+    color: #c9d1d9;
+  }
+
+  strong {
+    color: #f0f6fc;
+  }
+
+  /* Markdown Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0 22px 0;
+    font-size: 13.5px;
+    background: rgba(22, 27, 34, 0.5);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #30363d;
+  }
+
+  th, td {
+    padding: 10px 16px;
+    text-align: left;
+    border: 1px solid #30363d;
+  }
+
+  th {
+    background: #161b22;
+    color: #f0f6fc;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+  }
+
+  tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  tr:hover {
+    background: rgba(56, 189, 248, 0.04);
+  }
+
+  /* Code and Monospace Pills */
+  code {
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-size: 12.5px;
+    background: rgba(110, 118, 129, 0.2);
+    color: #79c0ff;
+    padding: 2px 7px;
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  /* Severity Badges */
+  .sev-critical {
+    color: #ff6b6b;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .badge-crit {
+    background: rgba(239, 68, 68, 0.25);
+    color: #ff6b6b;
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .sev-high {
+    color: #ff7b72;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .badge-high {
+    background: rgba(249, 115, 22, 0.2);
+    color: #ff7b72;
+    border: 1px solid rgba(249, 115, 22, 0.45);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .sev-medium {
+    color: #e3b341;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .badge-med {
+    background: rgba(234, 179, 8, 0.18);
+    color: #e3b341;
+    border: 1px solid rgba(234, 179, 8, 0.4);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .sev-low {
+    color: #79c0ff;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .badge-low {
+    background: rgba(59, 130, 246, 0.18);
+    color: #79c0ff;
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid #30363d;
+    margin: 24px 0 16px 0;
+  }
+
+  .doc-footer {
+    font-size: 12px;
+    color: #8b949e;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Bottom Status Bar */
+  .ide-status-bar {
+    background: #161b22;
+    border-top: 1px solid #21262d;
+    padding: 6px 18px;
+    font-size: 11.5px;
+    color: #8b949e;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+  }
+  .status-left, .status-right {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+  .status-item-active {
+    color: #f0f6fc;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+<div class="ide-window">
+
+  <!-- Title Bar -->
+  <div class="ide-title-bar">
+    <div class="window-controls">
+      <span class="ctrl-dot dot-close"></span>
+      <span class="ctrl-dot dot-min"></span>
+      <span class="ctrl-dot dot-max"></span>
+    </div>
+
+    <div class="ide-title-text">
+      <span>incident_report.md — Preview</span>
+      <span style="color: #484f58;">—</span>
+      <span>ATIE Adaptive Threat Intelligence Engine</span>
+    </div>
+
+    <div class="ide-title-actions">
+      <span>Markdown Preview: GitHub Dark</span>
+      <span>● Synchronized</span>
+    </div>
+  </div>
+
+  <!-- Editor Tab Bar -->
+  <div class="editor-tabs-bar">
+    <div class="editor-tab">
+      <span class="tab-md-icon">M↓</span>
+      <span>incident_report.md</span>
+    </div>
+    <div class="editor-tab active">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+      <span>Preview incident_report.md</span>
+      <span class="tab-badge">Rendered</span>
+    </div>
+  </div>
+
+  <!-- Breadcrumbs -->
+  <div class="editor-breadcrumbs">
+    <span>java project final</span>
+    <span class="bc-sep">&gt;</span>
+    <span>incident_report.md</span>
+    <span class="bc-sep">&gt;</span>
+    <span class="bc-active">Investigation Report Output</span>
+  </div>
+
+  <!-- Rendered Markdown Body -->
+  <div class="markdown-body">
+    
+    <h1>
+      <span class="doc-icon">🛡️</span>
+      SECURITY INCIDENT INVESTIGATION REPORT
+    </h1>
+
+    <h2>1. Executive Summary</h2>
+    <ul>
+      <li><strong>Report Generated At:</strong> 2026-07-24 18:28:51</li>
+      <li><strong>Total Incidents Triggered:</strong> 5</li>
+      <li><strong>Unique Attacking Sources (IPs):</strong> 5</li>
+      <li><strong>Affected Infrastructure Nodes:</strong> 1</li>
+    </ul>
+
+    <h3>Incident Distribution by Severity</h3>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 25%;">Severity</th>
+          <th style="width: 25%;">Count</th>
+          <th style="width: 50%;">Percentage</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge-low">LOW</span></td>
+          <td>1</td>
+          <td>20.0%</td>
+        </tr>
+        <tr>
+          <td><span class="badge-med">MEDIUM</span></td>
+          <td>2</td>
+          <td>40.0%</td>
+        </tr>
+        <tr>
+          <td><span class="badge-high">HIGH</span></td>
+          <td>1</td>
+          <td>20.0%</td>
+        </tr>
+        <tr>
+          <td><span class="badge-crit">CRITICAL</span></td>
+          <td>1</td>
+          <td>20.0%</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Incident Classification Breakdown</h3>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 65%;">Threat Classification</th>
+          <th style="width: 35%;">Counts</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Cross-Site Scripting (XSS)</td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td>Command Injection</td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td>Directory Traversal</td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td>Malicious URL Scan</td>
+          <td>2</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>2. Attack Vector Analysis (Top Risk Items)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Risk Score</th>
+          <th>Severity</th>
+          <th>Classification</th>
+          <th>Source IP</th>
+          <th>Target Host</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>8.5/10.0</code></td>
+          <td><span class="badge-crit">CRITICAL</span></td>
+          <td>Command Injection</td>
+          <td><code>85.25.43.10</code></td>
+          <td>Apache-Webserver</td>
+          <td>Boyer-Moore matched signature pattern: 'cmd.exe'</td>
+        </tr>
+        <tr>
+          <td><code>6.0/10.0</code></td>
+          <td><span class="badge-high">HIGH</span></td>
+          <td>Malicious URL Scan</td>
+          <td><code>185.220.101.5</code></td>
+          <td>Apache-Webserver</td>
+          <td>Boyer-Moore matched signature pattern: 'admin/config.php'</td>
+        </tr>
+        <tr>
+          <td><code>5.5/10.0</code></td>
+          <td><span class="badge-med">MEDIUM</span></td>
+          <td>Directory Traversal</td>
+          <td><code>192.168.1.75</code></td>
+          <td>Apache-Webserver</td>
+          <td>Trie prefix signature matched in payload.</td>
+        </tr>
+        <tr>
+          <td><code>4.0/10.0</code></td>
+          <td><span class="badge-med">MEDIUM</span></td>
+          <td>Cross-Site Scripting (XSS)</td>
+          <td><code>192.168.1.50</code></td>
+          <td>Apache-Webserver</td>
+          <td>Boyer-Moore matched signature pattern: '&lt;script&gt;'</td>
+        </tr>
+        <tr>
+          <td><code>3.5/10.0</code></td>
+          <td><span class="badge-low">LOW</span></td>
+          <td>Malicious URL Scan</td>
+          <td><code>192.168.1.12</code></td>
+          <td>Apache-Webserver</td>
+          <td>Boyer-Moore matched signature pattern: 'wp-admin'</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Incident Timeline (Chronological Audit)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Threat Category</th>
+          <th>Severity</th>
+          <th>Source IP</th>
+          <th>System Event Payload</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>18:00:20</code></td>
+          <td>Malicious URL Scan</td>
+          <td><span class="badge-high">HIGH</span></td>
+          <td><code>185.220.101.5</code></td>
+          <td><code>/admin/config.php</code></td>
+        </tr>
+        <tr>
+          <td><code>18:00:45</code></td>
+          <td>Cross-Site Scripting (XSS)</td>
+          <td><span class="badge-med">MEDIUM</span></td>
+          <td><code>192.168.1.50</code></td>
+          <td><code>/profile.php?id=&lt;script&gt;alert(document.cookie)&lt;/script&gt;</code></td>
+        </tr>
+        <tr>
+          <td><code>18:01:10</code></td>
+          <td>Directory Traversal</td>
+          <td><span class="badge-med">MEDIUM</span></td>
+          <td><code>192.168.1.75</code></td>
+          <td><code>/file_viewer.php?path=../../../../etc/passwd</code></td>
+        </tr>
+        <tr>
+          <td><code>18:01:25</code></td>
+          <td>Malicious URL Scan</td>
+          <td><span class="badge-low">LOW</span></td>
+          <td><code>192.168.1.12</code></td>
+          <td><code>/wp-admin/install.php</code></td>
+        </tr>
+        <tr>
+          <td><code>18:01:40</code></td>
+          <td>Command Injection</td>
+          <td><span class="badge-crit">CRITICAL</span></td>
+          <td><code>85.25.43.10</code></td>
+          <td><code>/shell.php?cmd=cmd.exe</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>4. Systems and Targets Impact Map</h2>
+    <h3>Node: <code>Apache-Webserver</code></h3>
+    <ul>
+      <li><strong>Total Alerts Registered:</strong> 5</li>
+      <li><strong>Distinct Threat Vectors:</strong> <code>[MALICIOUS_URL, DIRECTORY_TRAVERSAL, COMMAND_INJECTION, XSS_ATTACK]</code></li>
+      <li><strong>Offending Source IPs:</strong> <code>[192.168.1.75, 192.168.1.12, 85.25.43.10, 185.220.101.5, 192.168.1.50]</code></li>
+    </ul>
+
+    <h2>5. Security Mitigation Recommendations</h2>
+    <p>Based on the identified alerts, the following immediate remediation actions are recommended:</p>
+
+    <h3>Cross-Site Scripting (XSS) Mitigation</h3>
+    <ul>
+      <li><strong>Output Escaping:</strong> Apply strict context-sensitive output escaping (HTML, JS, CSS) on all user-submitted fields.</li>
+      <li><strong>Content Security Policy (CSP):</strong> Deploy a CSP header to prevent raw injection and inline script executions.</li>
+    </ul>
+
+    <h3>Command Injection Mitigation</h3>
+    <ul>
+      <li><strong>Disable Shell Execution:</strong> Avoid spawning runtime shell processes (<code>cmd.exe</code>, <code>/bin/sh</code>) inside app logic.</li>
+      <li><strong>Strict Whitelisting:</strong> If system commands must be run, use hardcoded parameter vectors instead of direct string inputs.</li>
+    </ul>
+
+    <h3>Directory Traversal Mitigation</h3>
+    <ul>
+      <li><strong>Canonical File Paths:</strong> Enforce verification of canonical file paths (<code>getCanonicalPath()</code>) prior to file access.</li>
+      <li><strong>Root Isolation (Chroot):</strong> Restrict system access levels by running server daemons inside isolated directories.</li>
+    </ul>
+
+    <h3>Threat Intelligence &amp; Scanning Mitigation</h3>
+    <ul>
+      <li><strong>Firewall Blocking:</strong> Block the offending blacklisted IPs at the border routing gateway / firewall levels.</li>
+      <li><strong>Decommission vulnerable services:</strong> Disable outdated web endpoints (like administrative installer entrypoints).</li>
+    </ul>
+
+    <hr>
+    <div class="doc-footer">
+      <span>*Document generated automatically by Adaptive Cybersecurity Threat Intelligence Engine.*</span>
+      <span>Module: IncidentReportGenerator.java | File: incident_report.md</span>
+    </div>
+
+  </div>
+
+  <!-- IDE Status Bar -->
+  <div class="ide-status-bar">
+    <div class="status-left">
+      <span class="status-item-active">Markdown Preview</span>
+      <span>Lines: 69</span>
+      <span>Size: 3.7 KB</span>
+      <span>Encoding: UTF-8</span>
+    </div>
+    <div class="status-right">
+      <span>Generated by: IncidentReportGenerator</span>
+      <span>Status: Validated SIEM Incident Audit</span>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

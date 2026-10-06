@@ -1,0 +1,33 @@
+# Build outputs
+target/
+*.class
+
+# Maven distribution
+apache-maven-*/
+
+# Node dependencies
+node_modules/
+package-lock.json
+
+# Temporary browser render artifacts
+.chrome_*
+chrome_temp/
+edge_temp/
+test_*
+test.html
+in.txt
+java project image
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# OS / Logs
+*.log
+Thumbs.db
+Desktop.ini
+.DS_Store

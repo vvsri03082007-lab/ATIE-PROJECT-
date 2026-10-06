@@ -1,0 +1,199 @@
+[36m[1m
+????????????????????????????????????????????????????????????????????????
+?         ADAPTIVE CYBERSECURITY THREAT INTELLIGENCE ENGINE            ?
+?          Enterprise Security Information & Event Management          ?
+????????????????????????????????????????????????????????????????????????[0m
+Initializing detection engines... [32mOK[0m
+Loading IP reputation databases... [32mOK (12 IPs)[0m
+Compiling signature indices... [32mOK[0m
+
+[1m--- MAIN DASHBOARD CONTROL MENU ---[0m
+[36m1. [0mConfigure Log Source [Current: [1mAPACHE[0m (/sample_logs/apache.log)]
+[36m2. [0mLaunch Live Replay Monitoring Console
+[36m3. [0mConfigure Detection Thresholds (Sliding Window / Z-Score)
+[36m4. [0mManage Threat Intelligence (IP Blacklist)
+[36m5. [0mView Threat Analytics Dashboard (Sorted Alerts & Graphs)
+[36m6. [0mSearch Active Alerts History (Search)
+[36m7. [0mClear Alert History & Queue (Delete)
+[36m8. [0mExport Incident Investigation Report (Markdown)
+[36m9. [0mExit Application
+[35m[1m10.[0m [1mLaunch Web Operations Dashboard (http://localhost:8080)[0m
+
+Select Option (1-10): 
+[1m--- LIVE REPLAY MONITORING MODE ACTIVE ---[0m
+Replaying [1mAPACHE[0m from resources path: /sample_logs/apache.log
+Playback speed: 200ms per line. Press [1mENTER[0m to stop monitoring and return to menu.
+
+[32m[PARSED LOG][0m IP:127.0.0.1       | User:ANONYMOUS  | Payload: /index.html
+[32m[PARSED LOG][0m IP:192.168.1.15    | User:ANONYMOUS  | Payload: /assets/style.css
+[32m[PARSED LOG][0m IP:192.168.1.20    | User:ANONYMOUS  | Payload: /login.php
+[32m[PARSED LOG][0m IP:185.220.101.5   | User:ANONYMOUS  | Payload: /admin/config.php
+[31m!!! ALERT: [Malicious URL Scan] HIGH | IP: 185.220.101.5 | Severity: HIGH | Risk: 6.0 | msg: Boyer-Moore matched signature pattern: 'admin/config.php' !!![0m
+[32m[PARSED LOG][0m IP:192.168.1.45    | User:ANONYMOUS  | Payload: /search.php?q=UNION SELECT username,password FROM users
+[35m!!! ALERT: [SQL Injection] MEDIUM | IP: 192.168.1.45 | Severity: MEDIUM | Risk: 5.0 | msg: Boyer-Moore matched signature pattern: 'UNION SELECT' !!![0m
+[32m[PARSED LOG][0m IP:192.168.1.50    | User:ANONYMOUS  | Payload: /profile.php?id=<script>alert(document.cookie)</script>
+[35m!!! ALERT: [Cross-Site Scripting (XSS)] MEDIUM | IP: 192.168.1.50 | Severity: MEDIUM | Risk: 4.0 | msg: Boyer-Moore matched signature pattern: '<script>' !!![0m
+[32m[PARSED LOG][0m IP:192.168.1.75    | User:ANONYMOUS  | Payload: /file_viewer.php?path=../../../../etc/passwd
+[35m!!! ALERT: [Directory Traversal] MEDIUM | IP: 192.168.1.75 | Severity: MEDIUM | Risk: 5.5 | msg: Trie prefix signature matched in payload. !!![0m
+[32m[PARSED LOG][0m IP:192.168.1.12    | User:ANONYMOUS  | Payload: /wp-admin/install.php
+[33m!!! ALERT: [Malicious URL Scan] LOW | IP: 192.168.1.12 | Severity: LOW | Risk: 3.5 | msg: Boyer-Moore matched signature pattern: 'wp-admin' !!![0m
+[32m[PARSED LOG][0m IP:85.25.43.10     | User:ANONYMOUS  | Payload: /shell.php?cmd=cmd.exe
+[1m[41m[31m!!! ALERT: [Command Injection] CRITICAL | IP: 85.25.43.10 | Severity: CRITICAL | Risk: 8.5 | msg: Boyer-Moore matched signature pattern: 'cmd.exe' !!![0m
+[32m[PARSED LOG][0m IP:192.168.1.15    | User:ANONYMOUS  | Payload: /dashboard.php
+[36m
+--- Log file playback simulation completed ---[0m
+[32mReturned to Main Dashboard.[0m
+
+[1m--- MAIN DASHBOARD CONTROL MENU ---[0m
+[36m1. [0mConfigure Log Source [Current: [1mAPACHE[0m (/sample_logs/apache.log)]
+[36m2. [0mLaunch Live Replay Monitoring Console
+[36m3. [0mConfigure Detection Thresholds (Sliding Window / Z-Score)
+[36m4. [0mManage Threat Intelligence (IP Blacklist)
+[36m5. [0mView Threat Analytics Dashboard (Sorted Alerts & Graphs)
+[36m6. [0mSearch Active Alerts History (Search)
+[36m7. [0mClear Alert History & Queue (Delete)
+[36m8. [0mExport Incident Investigation Report (Markdown)
+[36m9. [0mExit Application
+[35m[1m10.[0m [1mLaunch Web Operations Dashboard (http://localhost:8080)[0m
+
+Select Option (1-10): 
+[1m--- SECURITY THREAT ANALYTICS DASHBOARD ---[0m
+Total Incidents Logged: [1m6[0m
+
+[1mSeverity Distribution Graph:[0m
+  LOW        [[33m????????????????????[0m]  16% (1 alerts)
+  MEDIUM     [[35m????????????????????[0m]  50% (3 alerts)
+  HIGH       [[31m????????????????????[0m]  16% (1 alerts)
+  CRITICAL   [[1m[31m????????????????????[0m]  16% (1 alerts)
+
+[1mThreat Vector Classifications:[0m
+  Cross-Site Scripting (XSS) :  1 alerts
+  Malicious URL Scan        :  2 alerts
+  Directory Traversal       :  1 alerts
+  SQL Injection             :  1 alerts
+  Command Injection         :  1 alerts
+
+[1mTop Active Threat Alerts (Priority Queue Ordering):[0m
+  [1] [1m[31m[Severity: CRITICAL][0m Risk: 8.5 | IP: 85.25.43.10     | Target: Apache-Webserver | Boyer-Moore matched signature pattern: 'cmd.exe'
+  [2] [31m[Severity: HIGH][0m Risk: 6.0 | IP: 185.220.101.5   | Target: Apache-Webserver | Boyer-Moore matched signature pattern: 'admin/config.php'
+  [3] [35m[Severity: MEDIUM][0m Risk: 5.5 | IP: 192.168.1.75    | Target: Apache-Webserver | Trie prefix signature matched in payload.
+  [4] [35m[Severity: MEDIUM][0m Risk: 5.0 | IP: 192.168.1.45    | Target: Apache-Webserver | Boyer-Moore matched signature pattern: 'UNION SELECT'
+  [5] [35m[Severity: MEDIUM][0m Risk: 4.0 | IP: 192.168.1.50    | Target: Apache-Webserver | Boyer-Moore matched signature pattern: '<script>'
+  [6] [33m[Severity: LOW][0m Risk: 3.5 | IP: 192.168.1.12    | Target: Apache-Webserver | Boyer-Moore matched signature pattern: 'wp-admin'
+
+[1m--- MAIN DASHBOARD CONTROL MENU ---[0m
+[36m1. [0mConfigure Log Source [Current: [1mAPACHE[0m (/sample_logs/apache.log)]
+[36m2. [0mLaunch Live Replay Monitoring Console
+[36m3. [0mConfigure Detection Thresholds (Sliding Window / Z-Score)
+[36m4. [0mManage Threat Intelligence (IP Blacklist)
+[36m5. [0mView Threat Analytics Dashboard (Sorted Alerts & Graphs)
+[36m6. [0mSearch Active Alerts History (Search)
+[36m7. [0mClear Alert History & Queue (Delete)
+[36m8. [0mExport Incident Investigation Report (Markdown)
+[36m9. [0mExit Application
+[35m[1m10.[0m [1mLaunch Web Operations Dashboard (http://localhost:8080)[0m
+
+Select Option (1-10): [31mInvalid choice! Please select 1-10.[0m
+
+[1m--- MAIN DASHBOARD CONTROL MENU ---[0m
+[36m1. [0mConfigure Log Source [Current: [1mAPACHE[0m (/sample_logs/apache.log)]
+[36m2. [0mLaunch Live Replay Monitoring Console
+[36m3. [0mConfigure Detection Thresholds (Sliding Window / Z-Score)
+[36m4. [0mManage Threat Intelligence (IP Blacklist)
+[36m5. [0mView Threat Analytics Dashboard (Sorted Alerts & Graphs)
+[36m6. [0mSearch Active Alerts History (Search)
+[36m7. [0mClear Alert History & Queue (Delete)
+[36m8. [0mExport Incident Investigation Report (Markdown)
+[36m9. [0mExit Application
+[35m[1m10.[0m [1mLaunch Web Operations Dashboard (http://localhost:8080)[0m
+
+Select Option (1-10): [31mInvalid choice! Please select 1-10.[0m
+
+[1m--- MAIN DASHBOARD CONTROL MENU ---[0m
+[36m1. [0mConfigure Log Source [Current: [1mAPACHE[0m (/sample_logs/apache.log)]
+[36m2. [0mLaunch Live Replay Monitoring Console
+[36m3. [0mConfigure Detection Thresholds (Sliding Window / Z-Score)
+[36m4. [0mManage Threat Intelligence (IP Blacklist)
+[36m5. [0mView Threat Analytics Dashboard (Sorted Alerts & Graphs)
+[36m6. [0mSearch Active Alerts History (Search)
+[36m7. [0mClear Alert History & Queue (Delete)
+[36m8. [0mExport Incident Investigation Report (Markdown)
+[36m9. [0mExit Application
+[35m[1m10.[0m [1mLaunch Web Operations Dashboard (http://localhost:8080)[0m
+
+Select Option (1-10): 
+[1m--- SECURITY THREAT ANALYTICS DASHBOARD ---[0m
+Total Incidents Logged: [1m6[0m
+
+[1mSeverity Distribution Graph:[0m
+  LOW        [[33m????????????????????[0m]  16% (1 alerts)
+  MEDIUM     [[35m????????????????????[0m]  50% (3 alerts)
+  HIGH       [[31m????????????????????[0m]  16% (1 alerts)
+  CRITICAL   [[1m[31m????????????????????[0m]  16% (1 alerts)
+
+[1mThreat Vector Classifications:[0m
+  Cross-Site Scripting (XSS) :  1 alerts
+  Malicious URL Scan        :  2 alerts
+  Directory Traversal       :  1 alerts
+  SQL Injection             :  1 alerts
+  Command Injection         :  1 alerts
+
+[1mTop Active Threat Alerts (Priority Queue Ordering):[0m
+  [1] [1m[31m[Severity: CRITICAL][0m Risk: 8.5 | IP: 85.25.43.10     | Target: Apache-Webserver | Boyer-Moore matched signature pattern: 'cmd.exe'
+  [2] [31m[Severity: HIGH][0m Risk: 6.0 | IP: 185.220.101.5   | Target: Apache-Webserver | Boyer-Moore matched signature pattern: 'admin/config.php'
+  [3] [35m[Severity: MEDIUM][0m Risk: 5.5 | IP: 192.168.1.75    | Target: Apache-Webserver | Trie prefix signature matched in payload.
+  [4] [35m[Severity: MEDIUM][0m Risk: 5.0 | IP: 192.168.1.45    | Target: Apache-Webserver | Boyer-Moore matched signature pattern: 'UNION SELECT'
+  [5] [35m[Severity: MEDIUM][0m Risk: 4.0 | IP: 192.168.1.50    | Target: Apache-Webserver | Boyer-Moore matched signature pattern: '<script>'
+  [6] [33m[Severity: LOW][0m Risk: 3.5 | IP: 192.168.1.12    | Target: Apache-Webserver | Boyer-Moore matched signature pattern: 'wp-admin'
+
+[1m--- MAIN DASHBOARD CONTROL MENU ---[0m
+[36m1. [0mConfigure Log Source [Current: [1mAPACHE[0m (/sample_logs/apache.log)]
+[36m2. [0mLaunch Live Replay Monitoring Console
+[36m3. [0mConfigure Detection Thresholds (Sliding Window / Z-Score)
+[36m4. [0mManage Threat Intelligence (IP Blacklist)
+[36m5. [0mView Threat Analytics Dashboard (Sorted Alerts & Graphs)
+[36m6. [0mSearch Active Alerts History (Search)
+[36m7. [0mClear Alert History & Queue (Delete)
+[36m8. [0mExport Incident Investigation Report (Markdown)
+[36m9. [0mExit Application
+[35m[1m10.[0m [1mLaunch Web Operations Dashboard (http://localhost:8080)[0m
+
+Select Option (1-10): 
+[1m--- SECURITY THREAT ANALYTICS DASHBOARD ---[0m
+Total Incidents Logged: [1m6[0m
+
+[1mSeverity Distribution Graph:[0m
+  LOW        [[33m????????????????????[0m]  16% (1 alerts)
+  MEDIUM     [[35m????????????????????[0m]  50% (3 alerts)
+  HIGH       [[31m????????????????????[0m]  16% (1 alerts)
+  CRITICAL   [[1m[31m????????????????????[0m]  16% (1 alerts)
+
+[1mThreat Vector Classifications:[0m
+  Cross-Site Scripting (XSS) :  1 alerts
+  Malicious URL Scan        :  2 alerts
+  Directory Traversal       :  1 alerts
+  SQL Injection             :  1 alerts
+  Command Injection         :  1 alerts
+
+[1mTop Active Threat Alerts (Priority Queue Ordering):[0m
+  [1] [1m[31m[Severity: CRITICAL][0m Risk: 8.5 | IP: 85.25.43.10     | Target: Apache-Webserver | Boyer-Moore matched signature pattern: 'cmd.exe'
+  [2] [31m[Severity: HIGH][0m Risk: 6.0 | IP: 185.220.101.5   | Target: Apache-Webserver | Boyer-Moore matched signature pattern: 'admin/config.php'
+  [3] [35m[Severity: MEDIUM][0m Risk: 5.5 | IP: 192.168.1.75    | Target: Apache-Webserver | Trie prefix signature matched in payload.
+  [4] [35m[Severity: MEDIUM][0m Risk: 5.0 | IP: 192.168.1.45    | Target: Apache-Webserver | Boyer-Moore matched signature pattern: 'UNION SELECT'
+  [5] [35m[Severity: MEDIUM][0m Risk: 4.0 | IP: 192.168.1.50    | Target: Apache-Webserver | Boyer-Moore matched signature pattern: '<script>'
+  [6] [33m[Severity: LOW][0m Risk: 3.5 | IP: 192.168.1.12    | Target: Apache-Webserver | Boyer-Moore matched signature pattern: 'wp-admin'
+
+[1m--- MAIN DASHBOARD CONTROL MENU ---[0m
+[36m1. [0mConfigure Log Source [Current: [1mAPACHE[0m (/sample_logs/apache.log)]
+[36m2. [0mLaunch Live Replay Monitoring Console
+[36m3. [0mConfigure Detection Thresholds (Sliding Window / Z-Score)
+[36m4. [0mManage Threat Intelligence (IP Blacklist)
+[36m5. [0mView Threat Analytics Dashboard (Sorted Alerts & Graphs)
+[36m6. [0mSearch Active Alerts History (Search)
+[36m7. [0mClear Alert History & Queue (Delete)
+[36m8. [0mExport Incident Investigation Report (Markdown)
+[36m9. [0mExit Application
+[35m[1m10.[0m [1mLaunch Web Operations Dashboard (http://localhost:8080)[0m
+
+Select Option (1-10): [36m
+Shutting down ATIE Engine. Goodbye![0m
